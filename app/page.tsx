@@ -1,53 +1,58 @@
 export default function LoginPage() {
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8" style={{ backgroundColor: '#D3D3D3' }}>
       {/* Logo and Title */}
       <div className="flex flex-col items-center mb-12">
-        <svg width="140" height="70" viewBox="0 0 280 140" className="mb-4">
-          {/* Blue stripes for logo */}
-          <polygon points="80,30 95,30 110,70 95,70" fill="#0066CC" />
-          <polygon points="105,30 120,30 135,70 120,70" fill="#0099FF" />
-          <polygon points="92,35 107,35 115,70 100,70" fill="#33AAFF" />
-          <polygon points="120,32 135,32 145,70 130,70" fill="#0080CC" />
-          {/* Text SIERRA TEL */}
-          <text x="155" y="70" fontFamily="Georgia, serif" fontSize="52" fontWeight="bold" fill="#000">SIERRA TEL</text>
-        </svg>
+        <div className="flex items-center gap-3 mb-2">
+          <svg width="60" height="60" viewBox="0 0 60 60" className="flex-shrink-0">
+            {/* Blue stripes logo */}
+            <polygon points="15,15 20,15 30,45 25,45" fill="#0066CC" />
+            <polygon points="22,15 27,15 37,45 32,45" fill="#0099FF" />
+            <polygon points="29,15 34,15 44,45 39,45" fill="#33CCFF" />
+            <polygon points="36,15 41,15 51,45 46,45" fill="#0088DD" />
+          </svg>
+          <div className="text-4xl font-bold tracking-wider" style={{ color: '#333333', letterSpacing: '0.05em' }}>
+            SIERRA TEL
+          </div>
+        </div>
       </div>
 
       {/* Login Form Container */}
       <div className="w-full max-w-md">
-        <div className="bg-gray-200 border-2 border-gray-400 rounded">
+        <div style={{ backgroundColor: '#C0C0C0', border: '2px solid #A9A9A9', borderRadius: '4px' }}>
           {/* Form Header */}
-          <div className="bg-gray-300 border-b-2 border-gray-400 px-6 py-3">
-            <h1 className="text-center font-bold text-gray-800 text-base">Welcome to Sierra Tel Webmail</h1>
+          <div style={{ backgroundColor: '#D3D3D3', borderBottom: '1px solid #999', padding: '8px 16px' }}>
+            <h1 className="text-center font-bold text-base" style={{ color: '#333' }}>Welcome to Sierra Tel Webmail</h1>
           </div>
 
           {/* Form Content */}
-          <div className="bg-gray-100 px-8 py-8">
+          <div style={{ backgroundColor: '#E8E8E8', padding: '24px 32px' }}>
             <form className="space-y-6">
               {/* Email Address Field */}
               <div className="flex items-center gap-4">
-                <label htmlFor="email" className="text-sm text-gray-700 w-28 flex-shrink-0">
+                <label htmlFor="email" className="text-sm flex-shrink-0 w-28" style={{ color: '#333' }}>
                   E-mail Address
                 </label>
                 <input
                   type="email"
                   id="email"
                   name="email"
-                  className="flex-1 px-3 py-2 border border-gray-400 bg-white text-sm focus:outline-none"
+                  className="flex-1 px-3 py-2 border text-sm focus:outline-none"
+                  style={{ borderColor: '#999', backgroundColor: '#F5F5F5', color: '#333' }}
                 />
               </div>
 
               {/* Password Field */}
               <div className="flex items-center gap-4">
-                <label htmlFor="password" className="text-sm text-gray-700 w-28 flex-shrink-0">
+                <label htmlFor="password" className="text-sm flex-shrink-0 w-28" style={{ color: '#333' }}>
                   Password
                 </label>
                 <input
                   type="password"
                   id="password"
                   name="password"
-                  className="flex-1 px-3 py-2 border border-gray-400 bg-white text-sm focus:outline-none"
+                  className="flex-1 px-3 py-2 border text-sm focus:outline-none"
+                  style={{ borderColor: '#999', backgroundColor: '#F5F5F5', color: '#333' }}
                 />
               </div>
 
@@ -55,7 +60,8 @@ export default function LoginPage() {
               <div className="flex justify-center pt-2">
                 <button
                   type="submit"
-                  className="px-8 py-2 bg-gray-200 border-2 border-gray-400 text-sm font-medium text-gray-800 hover:bg-gray-300 transition-colors cursor-pointer"
+                  className="px-8 py-2 text-sm font-medium cursor-pointer hover:opacity-90 transition-opacity"
+                  style={{ backgroundColor: '#C0C0C0', border: '2px outset #DFDFDF', color: '#333' }}
                 >
                   Login
                 </button>
