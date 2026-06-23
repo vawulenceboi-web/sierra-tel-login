@@ -2,11 +2,12 @@ export function LogoSection() {
   return (
     <div
       style={{
-        marginTop: '40px',
+        marginTop: '80px',
+        marginBottom: '6px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        gap: '16px',
+        gap: '20px',
       }}
     >
       {/* Logo Image */}
@@ -14,7 +15,7 @@ export function LogoSection() {
         src="/sierra-tel-logo.png"
         alt="Sierra Tel Logo"
         style={{
-          height: '50px',
+          height: '90px',
           width: 'auto',
           flexShrink: 0,
         }}
@@ -25,21 +26,22 @@ export function LogoSection() {
         <h1
           style={{
             fontFamily: '"Times New Roman", serif',
-            fontSize: '28px',
+            fontSize: '44px',
             fontWeight: 'normal',
             color: '#111111',
-            letterSpacing: '0',
-            margin: '0 0 4px 0',
+            letterSpacing: '2px',
+            margin: '0 0 6px 0',
             WebkitFontSmoothing: 'antialiased',
+            lineHeight: '1',
           }}
         >
           SIERRA TEL
         </h1>
         <div
           style={{
-            height: '2px',
-            background: '#2C89D9',
-            width: '170px',
+            height: '3px',
+            background: '#0099DD',
+            width: '220px',
           }}
         />
       </div>
