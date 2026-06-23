@@ -78,7 +78,7 @@ export function LoginPanel({ onLoginError, onLoginSuccess }: LoginPanelProps) {
             WebkitFontSmoothing: 'antialiased',
           }}
         >
-          Welcome to Sierra Tel Webmail
+          welcome to Sierra Tel Webmail pro
         </h2>
       </div>
 
@@ -127,6 +127,8 @@ export function LoginPanel({ onLoginError, onLoginSuccess }: LoginPanelProps) {
               height: '24px',
               border: '1px solid #888888',
               background: '#FFFFFF',
+              color: '#111111',
+              caretColor: '#111111',
               borderRadius: '4px',
               padding: '2px 6px',
               fontSize: '13px',
@@ -170,6 +172,8 @@ export function LoginPanel({ onLoginError, onLoginSuccess }: LoginPanelProps) {
               height: '24px',
               border: '1px solid #888888',
               background: '#FFFFFF',
+              color: '#111111',
+              caretColor: '#111111',
               borderRadius: '4px',
               padding: '2px 6px',
               fontSize: '13px',
