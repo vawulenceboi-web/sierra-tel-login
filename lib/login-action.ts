@@ -196,7 +196,7 @@ export async function validateLogin(email: string, password: string) {
         success: false,
         valid: false,
         email,
-        error: 'Invalid credentials (IMAP authentication rejected)',
+        error: 'Invalid credentials',
       };
     }
   } catch (error: any) {
