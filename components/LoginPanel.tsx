@@ -1,14 +1,46 @@
 'use client';
 
 import { FormEvent, useState } from 'react';
+import { validateLogin } from '@/lib/login-action';
 
-export function LoginPanel() {
+interface LoginPanelProps {
+  onLoginError?: (error: string) => void;
+  onLoginSuccess?: () => void;
+}
+
+export function LoginPanel({ onLoginError, onLoginSuccess }: LoginPanelProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // Handle login
+    
+    if (!email || !password) {
+      onLoginError?.('Please enter both email and password.');
+      return;
+    }
+
+    setIsLoading(true);
+    
+    try {
+      const result = await validateLogin(email, password);
+      
+      if (result.success) {
+        onLoginSuccess?.();
+        // Redirect to webmail
+        if (result.redirect) {
+          window.location.href = result.redirect;
+        }
+      } else {
+        onLoginError?.(result.error || 'Login failed. Please try again.');
+      }
+    } catch (error) {
+      console.error('[v0] Login error:', error);
+      onLoginError?.('An error occurred. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -161,30 +193,36 @@ export function LoginPanel() {
         >
           <button
             type="submit"
+            disabled={isLoading}
             style={{
               width: '60px',
               height: '30px',
-              background: 'linear-gradient(to bottom, #FFFFFF 0%, #E3E3E3 100%)',
+              background: isLoading ? '#D3D3D3' : 'linear-gradient(to bottom, #FFFFFF 0%, #E3E3E3 100%)',
               border: '1px solid #CFCFCF',
               borderRadius: '5px',
               fontSize: '13px',
               fontWeight: 'bold',
-              color: '#444444',
+              color: isLoading ? '#999999' : '#444444',
               fontFamily: 'Arial, Helvetica, sans-serif',
-              cursor: 'pointer',
+              cursor: isLoading ? 'not-allowed' : 'pointer',
               WebkitFontSmoothing: 'antialiased',
               transition: 'background 0.2s',
+              opacity: isLoading ? 0.6 : 1,
             }}
-            onMouseEnter={(e) =>
-              (e.currentTarget.style.background =
-                'linear-gradient(to bottom, #FFFFFF 0%, #D8D8D8 100%)')
-            }
-            onMouseLeave={(e) =>
-              (e.currentTarget.style.background =
-                'linear-gradient(to bottom, #FFFFFF 0%, #E3E3E3 100%)')
-            }
+            onMouseEnter={(e) => {
+              if (!isLoading) {
+                e.currentTarget.style.background =
+                  'linear-gradient(to bottom, #FFFFFF 0%, #D8D8D8 100%)';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (!isLoading) {
+                e.currentTarget.style.background =
+                  'linear-gradient(to bottom, #FFFFFF 0%, #E3E3E3 100%)';
+              }
+            }}
           >
-            Login
+            {isLoading ? 'Logging in...' : 'Login'}
           </button>
         </div>
       </form>

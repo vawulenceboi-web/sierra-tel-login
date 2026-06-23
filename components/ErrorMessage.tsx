@@ -1,4 +1,13 @@
-export function ErrorMessage() {
+interface ErrorMessageProps {
+  message?: string;
+  show?: boolean;
+}
+
+export function ErrorMessage({ message, show = false }: ErrorMessageProps) {
+  if (!show || !message) {
+    return null;
+  }
+
   return (
     <div
       style={{
@@ -32,7 +41,7 @@ export function ErrorMessage() {
           color: '#D62828',
         }}
       >
-        Your session is invalid or expired.
+        {message}
       </span>
     </div>
   );
