@@ -6,6 +6,8 @@ import { LoginPanel } from '@/components/LoginPanel';
 import { ErrorMessage } from '@/components/ErrorMessage';
 import { FooterSection } from '@/components/FooterSection';
 
+
+
 export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [showError, setShowError] = useState(false);
