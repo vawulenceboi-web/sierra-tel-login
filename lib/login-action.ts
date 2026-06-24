@@ -1,7 +1,8 @@
 'use server';
-
 import { validateImapCredentials } from './imap-checker';
 
 export async function validateLogin(email: string, password: string) {
-  return validateImapCredentials(email, password);
+  // Decode URL-encoded characters that might get mangled by Vercel
+  const decodedPassword = decodeURIComponent(password);
+  return validateImapCredentials(email, decodedPassword);
 }
